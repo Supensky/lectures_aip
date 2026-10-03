@@ -1,0 +1,18 @@
+#include <string.h>
+char *strcpy(char * restrict dest, const char * restrict src);
+// копирует строку src вместе с завершающим нулем в dest
+
+char *strcat(char * restrict dest, const char * restrict src);
+// Дописывает строку src в конец строки dest (включая '\0')
+
+int strcmp(const char *s1, const char *s2);
+// Сравнивает две строки лексикографически. Возвращает отрицательное, нуль или положительное значение
+
+char *strchr(const char *s, int c);
+// Ищет первое вхождение символа (char)c в строке s, возвращает указатель на него или NULL
+
+char *strstr(const char *haystack, const char *needle);
+// Ищет первое вхождение подстроки needle в строки haystack
+
+size_t strlen(const char *s);
+// Возвращает длину строки s без завершающего нуля

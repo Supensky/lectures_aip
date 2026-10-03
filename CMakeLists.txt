@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 4.3)
+project(teor_infa C)
+
+set(CMAKE_C_STANDARD 11)
+
+add_executable(main main.c)
+add_executable(lab3 labs/lab3.c)
+add_executable(structs structs.c)
+add_executable(binsort lectures/binsort.c)
+add_executable(quicksort lectures/quicksort.c)
+add_executable(hashtab lectures/hashtab.c)
+add_executable(lab4 lab4.c)
+add_executable(lab5 labs/lab5.c)
+add_executable(lab5_1 labs/lab5_1.c)
+add_executable(DZ1 DZ1.c)
+add_executable(DZ1_1 DZ1_1.c)

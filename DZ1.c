@@ -66,15 +66,15 @@ double postfix_notation(const char *x) {
                 }
             }
         }
-        token = strtok(NULL, " ");           //
+        token = strtok(NULL, " ");           // переход к следующему числу/знаку
     }
-    double result = pop(&stack);
-    if (!isEmpty(&stack)) {
-        printf("Некорректное выражение ОПЗ\n");
-        free(input);
+    double result = pop(&stack);                  // забираем result из стека
+    if (!isEmpty(&stack)) {                       // если стек пуст
+        printf("Некорректное выражение ОПЗ\n"); // ошибка
+        free(input);                              // освобождаем память
     }
-    free(input);
-    return result;
+    free(input);                                  // освобождаем память
+    return result;                                // возвращаем result
 }
 
 int main () {

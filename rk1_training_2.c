@@ -2,21 +2,16 @@
 #include <stdlib.h>
 
 int main() {
-    int k = 2;
-    int *arr = (int *)malloc(sizeof(int) * k);
-    int a;
-    int l = 0;
+    int len = 2, l = 0, a, *arr;
+    arr = (int *)malloc(sizeof(int) * len);
     while (1) {
-        if (scanf("%d", &a) != 1) {
-            continue;
-        }
+        scanf("%d", &a);
         if (a == 0) {
             break;
         }
-        if (l == k) {
-            k *= 2;
-            int *p = (int *)realloc(arr, sizeof(int) * k);
-            arr = p;
+        if (l == len) {
+            len *= 2;
+            arr = (int *)realloc(arr, sizeof(int) * len);
         }
         arr[l] = a;
         l++;
@@ -26,6 +21,5 @@ int main() {
     }
     printf("\n");
     free(arr);
-    arr = NULL;
     return 0;
 }

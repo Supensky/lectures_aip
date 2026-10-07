@@ -1,30 +1,62 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct {
-    char name[100];
     int n;
     float sr;
+
+    char name[0];
 } Student;
 
-void prStudent(const Student *arr, int l) {
-    for (int i = 0; i < l; i++) {
-        if ((arr + i)->n == 3 && (arr + i)->sr > 4.5f) {
-            printf("Student %s: n = %d, sr = %.2f \n", (arr+i)->name, (arr+i)->n, (arr+i)->sr);
+
+Student * newStudent(int n, char name[], float sr) {
+    Student * student = (Student *) malloc(sizeof(Student) + strlen(name) + 1);
+    student->n = n;
+    strcpy(student->name, name);
+    student->name[strlen(name)] = '\0';
+    student->sr = sr;
+    return student;
+
+}
+void prStudent(Student **arr, int l) {
+        for (int i = 0; i < l; i++) {
+            if (arr[i]->n  == 3 && arr[i]->sr >= 4.5f) {
+                printf("Student %s: n = %d, sr = %.2f \n", arr[i]->name, arr[i]->n, arr[i]->sr);
         }
     }
 }
 
 int main() {
-    Student students[8] = {
-        {"Ivan Ivanov", 2, 4.5f},
-        {"Peter Petrov", 1, 3.0f},
-        {"Kuzma Kuznetsov", 3, 4.7f},
-        {"Andrey Andreev", 3, 3.0f},
-        {"Alexander Alexandrov", 3, 4.0f},
-        {"Daniil Danilov", 3, 3.0f},
-        {"Egor Egorov", 3, 5.0f},
-        {"Lev Lvov", 3, 4.6f}
+    Student *students[] = {
+       newStudent(3, "A", 4.5f),
+        newStudent(3, "B", 4.5f),
+        newStudent(3, "C", 4.5f),
+        newStudent(3, "D", 4.5f),
+        newStudent(3, "E", 4.5f),
+        newStudent(3, "F", 4.5f),
+        newStudent(3, "G", 4.5f),
+        newStudent(3, "H", 4.5f),
+        newStudent(3, "I", 4.5f),
+        newStudent(3, "J", 4.5f),
+        newStudent(3, "K", 4.5f),
+        newStudent(3, "L", 4.5f),
+        newStudent(3, "M", 4.5f),
+        newStudent(3, "N", 4.5f),
+        newStudent(3, "O", 4.5f),
+        newStudent(3, "P", 4.5f),
+        newStudent(3, "Q", 4.5f),
+        newStudent(3, "R", 4.5f),
+        newStudent(3, "S", 4.5f),
+        newStudent(3, "T", 4.5f),
+        newStudent(3, "U", 4.5f),
+        newStudent(3, "V", 4.5f),
+        newStudent(3, "W", 4.5f),
+        newStudent(3, "X", 4.5f),
+        newStudent(3, "Y", 4.5f),
+        newStudent(3, "Z", 1.5f),
+
     };
-    prStudent(students, 8);
+    prStudent(students, sizeof(students) / sizeof(Student *));
     return 0;
 }

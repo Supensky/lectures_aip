@@ -4,7 +4,7 @@
 
 typedef struct {               // стек
     double data[100];          // data[размер стека]
-    int top;                   // переменная, хранящая индекс самого верхнего элемента в массиве
+    size_t top;                   // переменная, хранящая индекс самого верхнего элемента в массиве
 } Stack;
 
 void initStack(Stack *s) {                        // инициализация стека
@@ -60,7 +60,7 @@ double postfix_notation(const char *x) {
                         }
                     push(&stack, a / b); break; // a / b
                     default:                       // если не был распознан ни один из операторов
-                        printf("Unknown operator\n"); // ощибка, неизвестный оператор
+                        printf("Unknown operator\n"); // ошибка, неизвестный оператор
                         free(input);                        // освобождение памяти
                         return 0.0;
                 }
@@ -78,7 +78,7 @@ double postfix_notation(const char *x) {
 }
 
 int main () {
-    char input[] = "3 4 + 2 * 7 /";
+    char input[] = "3 4 + 2 * 7 /"; // (((3 + 4)*2)/7)
     printf("%s = ", input);
     double res = postfix_notation(input);
     printf("%.2lf\n", res);

@@ -17,6 +17,7 @@ double *input_array() {
 }
 
 void print_array(double *arr, int n) {
+    printf("Отсортированный массив с удаленными отрицательными элементами:\n");
     for (int i = 0; i < n; i++) {
         printf("%.2lf\n", arr[i]);
     }
@@ -49,7 +50,7 @@ void mas_sort(double *arr, int n) {
     while (bb) {
         bb = 0;
         for (int j = 0; j < i; j++) {
-            if ((arr[j]) > (arr[j + 1])) {
+            if ((arr[j]) < (arr[j + 1])) {
                 buf = arr[j];
                 (arr[j]) = (arr[j + 1]);
                 (arr[j + 1]) = buf;

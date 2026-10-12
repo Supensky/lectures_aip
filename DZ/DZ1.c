@@ -1,84 +1,122 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-typedef struct {               // стек
-    double data[100];          // data[размер стека]
-    int top;                   // переменная, хранящая индекс самого верхнего элемента в массиве
-} Stack;
+typedef struct Stack {
+    double value;
+    struct Stack* next;
+} stack;
 
-void initStack(Stack *s) {                        // инициализация стека
-    s->top = -1;
-}
-
-int isEmpty(Stack *s) {                           // проверка пуст ли стек в данный момент
-    return s->top == -1;                          // 1 - пуст, 0 - не пуст
-}
-
-void push(Stack *s, double val) {                 // операция добавления нового числа на верх стека
-    if (s->top < 99) {                            // есть ли свободное место в стеке
-        s->data[++(s->top)] = val;                // увеличиваем top на 1 и кладем число на верх стека
-    } else {
-        printf("Stack is full\n");          // ошибка, места в стеке нет
+stack* init_stack(double value) {
+    stack* s = (stack*)malloc(sizeof(stack));
+    if (s == NULL) {
+        printf("Memory allocation error\n");
+        exit(1);
     }
+    s -> value = value;
+    s -> next = NULL;
+    return s;
 }
 
-double pop(Stack *s) {                      // возвращает самое верхнее число из стека, удаляя его оттуда
-    if (!isEmpty(s)) {                            // если число есть в стеке
-        return s->data[s->top--];                 // Возвращаем верхнее число, уменьшаем top на 1
+int is_empty(stack* s) {
+    return s == NULL;
+}
+
+void push(stack **head, double val) {
+    stack *newstack = init_stack(val);
+    newstack -> next = *head;
+    *head = newstack;
+}
+
+double pop(stack **head) {
+    if (!is_empty(*head)) {
+        stack *temp = *head;
+        double val = temp -> value;
+        *head = (*head) -> next;
+        free(temp);
+        return val;
     } else {
-        printf("Stack is empty\n");         // ошибка, стек пуст
+        // Изменено: не пишем здесь ошибку в stdout,
+        // так как логику нехватки операндов лучше обрабатывать в самой функции калькулятора
+        return 0.0;
     }
 }
 
 double postfix_notation(const char *x) {
-    Stack stack;                                  // создание переменной для хранения стека
-    initStack(&stack);                            // инициализация стека
+    stack *head = NULL;
 
-    char *input = strdup(x);                      // копируем все символы исходной строки
-    char *token = strtok(input, " ");        // разбиение по пробелам
+    char *input = strdup(x);
+    char *token = strtok(input, " ");
 
-    while (token != NULL) {                       // пока в строке есть элементы
-        char *endptr;                             // указатель на символ
-        double val = strtod(token, &endptr);      // из str в double, если число
+    while (token != NULL) {
+        char *endptr;
+        double val = strtod(token, &endptr);
 
-        if (endptr != token && *endptr == '\0') { // если было распознано число
-            push(&stack, val);                    // добавляем элемент в вершину стека
-        } else {                                  // если не число, значит это оператор
-            if (strlen(token) == 1) {             // проверяем что в token лежит один символ
-                double b = pop(&stack);           // число b
-                double a = pop(&stack);           // число a
+        if (endptr != token && *endptr == '\0') {
+            push(&head, val);
+        } else {
+            // Проверяем, что это действительно один из известных односимвольных операторов
+            if (strlen(token) == 1 && strchr("+-*/^", token[0]) != NULL) {
+
+                // Валидация: для бинарной операции нужно минимум 2 элемента в стеке
+                if (is_empty(head) || is_empty(head->next)) {
+                    printf("Error: Not enough operands for operator '%c'\n", token[0]);
+                    free(input);
+                    // Очистка стека перед выходом
+                    while(!is_empty(head)) pop(&head);
+                    return 0.0;
+                }
+
+                double b = pop(&head);
+                double a = pop(&head);
+
                 switch (token[0]) {
-                    case '+': push(&stack, a + b); break; // a + b
-                    case '-': push(&stack, a - b); break; // a - b
-                    case '*': push(&stack, a * b); break; // a * b
+                    case '+': push(&head, a + b); break;
+                    case '-': push(&head, a - b); break;
+                    case '*': push(&head, a * b); break;
+                    case '^': push(&head, pow(a, b)); break;
                     case '/':
-                        if (b == 0) { // знаменатель не равен 0
-                            printf("Division by zero\n"); // ошибка, деление на 0
-                            free(input); // освобождение памяти
+                        if (b == 0.0) {
+                            printf("Error: Division by zero\n");
+                            free(input);
+                            while(!is_empty(head)) pop(&head);
                             return 0.0;
                         }
-                    push(&stack, a / b); break; // a / b
-                    default:                       // если не был распознан ни один из операторов
-                        printf("Unknown operator\n"); // ошибка, неизвестный оператор
-                        free(input);                        // освобождение памяти
-                        return 0.0;
+                        push(&head, a / b); // ИСПРАВЛЕНО: Добавлен недостающий оператор
+                        break;
                 }
+            } else {
+                printf("Unknown token or operator: %s\n", token);
+                free(input);
+                while(!is_empty(head)) pop(&head);
+                return 0.0;
             }
         }
-        token = strtok(NULL, " ");           // переход к следующему числу/знаку
+        token = strtok(NULL, " ");
     }
-    double result = pop(&stack);                  // забираем result из стека
-    if (!isEmpty(&stack)) {                       // если стек пуст
-        printf("Некорректное выражение ОПЗ\n"); // ошибка
-        free(input);                              // освобождаем память
+
+    if (is_empty(head)) {
+        printf("Error: Empty expression\n");
+        free(input);
+        return 0.0;
     }
-    free(input);                                  // освобождаем память
-    return result;                                // возвращаем result
+
+    double result = pop(&head);
+
+    if (!is_empty(head)) {
+        printf("Incorrect input (too many operands)\n");
+        while (!is_empty(head)) {
+            pop(&head);
+        }
+    }
+
+    free(input);
+    return result;
 }
 
 int main () {
-    char input[] = "3 4 + 2 * 7 /"; // (((3 + 4)*2)/7)
+    char input[] = "3 4 + 2 * 7 /"; // (((3 + 4)*2)/7) = 14 / 7 = 2.00
     printf("%s = ", input);
     double res = postfix_notation(input);
     printf("%.2lf\n", res);

@@ -9,23 +9,23 @@ typedef struct Stack {
     struct Stack *next;
 } stack;
 
-stack* init_stack(double value, char type) {
-    stack* s = (stack*)malloc(sizeof(stack));
-    s -> value = value;
-    s -> next = NULL;
-    s->type =type;
+stack *init_stack(double value, char type) {
+    stack *s = (stack *)malloc(sizeof(stack));
+    s->value = value;
+    s->next = NULL;
+    s->type = type;
     return s;
 }
 
-int is_empty(stack* s) {
+int is_empty(stack *s) {
     return s == NULL;
 }
 
 double pop_num(stack **head) {
     if (!is_empty(*head)) {
         stack *temp = *head;
-        double val = temp -> value;
-        *head = (*head) -> next;
+        double val = temp->value;
+        *head = (*head)->next;
         free(temp);
         return val;
     } else {
@@ -37,8 +37,8 @@ double pop_num(stack **head) {
 char pop_type(stack **head) {
     if (!is_empty(*head)) {
         stack *temp = *head;
-        double val = temp -> type;
-        *head = (*head) -> next;
+        double val = temp->type;
+        *head = (*head)->next;
         free(temp);
         return val;
     } else {
@@ -48,12 +48,9 @@ char pop_type(stack **head) {
 
 int is_type(stack **head) {
     if (!is_empty(*head)) {
-        stack *temp = *head;
-        if (temp -> type == 'n') {
-            free(temp);
+        if ((*head)->type == 'n') {
             return 0;
         } else {
-            free(temp);
             return 1;
         }
     } else {
@@ -64,25 +61,30 @@ int is_type(stack **head) {
 
 void push(stack **head, double val, char type) {
     stack *newstack = init_stack(val, type);
-    newstack -> next = *head;
+    newstack->next = *head;
     *head = newstack;
 }
 
-int priority(char c) {
-    switch (c){
-        case '+': return 0;
-        case '-': return 0;
-        case '*': return 1;
-        case '^': return 2;
+int priority(stack *a) {
+    int deep_level = a->value;
+    switch (a->type) {
+        case '+': return 0 + deep_level * 6;
+        case '-': return 0 + deep_level * 6;
+        case '*': return 1 + deep_level * 6;
+        case '^': return 2 + deep_level * 6;
     }
     return -1;
 }
 
 
 
-stack* infix_to_postfix(const char *x) {
+stack *infix_to_postfix(char *x) {
     stack *head1 = NULL;
     stack *head2 = NULL;
+    if (x[strlen(x) - 1] == '\n') {
+        x[strlen(x) - 1] = '\0';
+    }
+    int deep_level = 0;
     stack *ans = NULL;
     char *input = strdup(x);
     char *token = strtok(input, " ");
@@ -91,81 +93,89 @@ stack* infix_to_postfix(const char *x) {
     while (token != NULL) {
         char *endptr;
         double val = strtod(token, &endptr);
+
         if (endptr != token && *endptr == '\0') {
-            push(&head1, val,'n');
-        } else {
+            push(&head1, val, 'n');
+            token = strtok(NULL, " ");
+            continue;
+        }
+        if (token[0] == '(') {
+            deep_level++;
+            token = strtok(NULL, " ");
+            continue;
+        }  if (token[0] == ')') {
+            deep_level--;
+            token = strtok(NULL, " ");
+            continue;
+        }
+         {
             if (strlen(token) == 1) {
-                // 2 + 3 * 4 -> 3 4 * 2 +
-                // 2 * 3 + 4 -> 2 3 * 4 +
-                // if (token[0] == '(') {
-                //     a += 1;
-                // } else if (token[0] == ')') {
-                //     a -= 1;
-                // }
-                while (head2 && priority(token[0]) < priority(head2->type)) {
+                stack *tmp = init_stack(deep_level, token[0]);
+                while (head2 && priority(tmp) < priority(head2)) {
                     if (is_empty(ans)) {
-                        push(&ans,head1->value,'n');
+                        push(&ans, head1->value, 'n');
                         pop_num(&head1);
                     }
-                    push(&ans,head1->value,'n');
+                    push(&ans, head1->value, 'n');
                     pop_num(&head1);
-                    push(&ans,0,head2->type);
+                    push(&ans, deep_level, head2->type);
                     pop_type(&head2);
                 }
-                push(&head2,0,token[0]);
+                free(tmp);
+                push(&head2, deep_level, token[0]);
             }
         }
         token = strtok(NULL, " ");
     }
     while (head2) {
         if (is_empty(ans)) {
-            push(&ans,head1->value,'n');
+            push(&ans, head1->value, 'n');
             pop_num(&head1);
         }
-        push(&ans,head1->value,'n');
+        push(&ans, head1->value, 'n');
         pop_num(&head1);
-        push(&ans,0,head2->type);
+        push(&ans, deep_level, head2->type);
         pop_type(&head2);
     }
     return ans;
 }
 
 
-
-stack* newlist(stack *head) {
-    stack **newlist = &head;
-    head = head -> next;
+stack *newlist(stack *head) {
+    stack *newlist = init_stack(head->value, head->type);
+    head = head->next;
     while (head != NULL) {
-        push(newlist, head -> value, head -> type);
-        head = head -> next;
+        push(&newlist, head->value, head->type);
+        head = head->next;
     }
-    return *newlist;
+    return newlist;
 }
-
 
 
 double postfix_notation(stack *poliz) {
     stack *head = NULL;
     stack *plz = newlist(poliz);
-
-    while (plz -> next != NULL) { // какое условие сюда вписать чтобы закончилось когда
-        // не будет следующего эл списка
-        if (!(is_type(&plz))) {
-            push(&head, plz -> value, plz -> type);
-        } else {
+    while (plz != NULL) {
+        push(&head, plz->value, plz->type);
+        if (is_type(&head)) {
+            char oper = pop_type(&head);
             double b = pop_num(&head);
             double a = pop_num(&head);
-            switch (head -> type) {
-                case '+': push(&head, a + b, 'n'); break;
-                case '-': push(&head, a - b, 'n'); break;
-                case '*': push(&head, a * b, 'n'); break;
-                case '^': push(&head, pow(a, b), 'n'); break;
+            switch (oper) {
+                case '+': push(&head, a + b, 'n');
+                    break;
+                case '-': push(&head, a - b, 'n');
+                    break;
+                case '*': push(&head, a * b, 'n');
+                    break;
+                case '^': push(&head, pow(a, b), 'n');
+                    break;
                 default:
                     printf("Unknown operator\n");
                     return 0.0;
             }
         }
-        plz = plz -> next;
+        plz = plz->next;
     }
     double result = pop_num(&head);
     if (!is_empty(head)) {
@@ -175,6 +185,8 @@ double postfix_notation(stack *poliz) {
 }
 
 int main() {
-    printf("%.2lf\n", postfix_notation(infix_to_postfix("2 + 3 * 4")));
+    char buf[100];
+    fgets(buf, 100, stdin);
+    printf("%.2lf\n", postfix_notation(infix_to_postfix(buf)));
     return 0;
 }

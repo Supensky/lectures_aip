@@ -1,5 +1,5 @@
 /*
-Лекция 1
+ЛЕКЦИЯ 1
 !!! C++ !!!
 
    auto для переменных, которые мы пока не знаем какого типа будут
@@ -357,5 +357,341 @@ public:
 static_assert(Math::square(5) == 25); // из-за static можно вызывать вне функций
 
 СТАТИЧЕСКИЕ МЕТОДЫ
+
+ЛЕКЦИЯ 3
+
+СТАТИЧЕСКИЕ МЕТОДЫ
+
+
+ПРИМЕР ИМЕНОВАННЫЙ КОНСТРУКТОР
+
+#include <cmath>
+class Point {
+    double x_, y_;
+    Point(double x, double y) : x_(x), y_(y) {}
+public:
+    static Point fromPolar(double r, double phi) {
+        return Point(r * std::cos(phi), r * std::sin(phi));
+    }
+};
+
+// Где-то в другом месте программы
+auto p = Point::fromPolar(1.0, 0.0);
+
+
+ПРИМЕР ФАБРИЧНЫЙ МЕТОД
+
+#include <string>
+
+// Базовый класс
+class Shape {
+public:
+    // Нужен для того, чтобы при удалении по указателю на базовый класс
+    // вызывался деструктор дочернего класса, если он есть
+    virtual ~Shape() = default;
+};
+
+class Circle : public Shape()
+class Square : public Shape()
+
+class ShapeFactory {
+public:
+    static Shape* create(const std::string& type) {
+        if (type == "circle") return new Circle();
+        return new Square()
+    }
+};
+
+// Где-то в коде
+Shape* s = ShapeFactory::create("circle");
+// ...
+delete s;
+
+
+ПРИМЕР СИНГЛТОН
+
+class Config {
+    Config() = default; // Приватный конструктор по умолчанию
+public:
+    static Config& instance() {
+        static Config cfg;
+        return cfg;
+    }
+    // Какой-то код
+};
+
+// Где-то в коде
+auto& cfg = Config::instance();
+
+auto config = Config::instance(); // Ссылка на тот же объект
+
+
+ПРИМЕР КОЛЛБЭК
+
+#include <iostream>
+
+// Класс-обработчик событий
+class Handler {
+public:
+    static void onEvent(int value) {
+        std::cout << "[Handler] получено значение " << value << "\n";
+    }
+};
+
+// Функция, принимающая коллбэк (указатель на функцию)
+void process(int data, void(*callback)(int)) {
+    std::cout << "Обрабатываю данные: " << data << "\n";
+    // ... какая-то работа ...
+
+    // Вызываем коллбэк
+    callback(data * 2);
+}
+
+int main() {
+     // Передаем статические метод как коллбэк
+     process(21, &Handler::onEvent);
+
+НАСЛЕДОВАНИЕ В ООП
+
+
+ПРИМЕР НАСЛЕДОВАНИЯ, ОСНОВАННОГО НА КЛАССАХ
+
+class Figure {};
+
+class Square : public Figure {
+    double side_;
+public:
+    explicit Square(double side) : side_(side) {}
+};
+
+class Circle : public Figure {
+    double radius_;
+public:
+    explicit Circle(double radius) : radius_(radius) {}
+};
+
+int main() {
+    Square s(5.0);
+    Circle c(3.0);
+}
+
+Наследование - выражение отношения "является"
+Композиция - сочетание с владением, когда времена жизни совпадают (исчезает класс, исчезают дочерние)
+Агрегация - сочетание без владения (исчезает класс, дочерние остаются)
+
+ПРИМЕР КОМПОЗИЦИИ
+
+#include <iostream>
+#include <stdexcept>
+
+class Fraction {
+public:
+    Fraction(int num, int den) : num_(num), den_(den) {
+        if (den_ == 0)
+            throw std::invalid_argument("denominator cannot be zero");
+    }
+    void print() const {
+        std::cout << num_ << "/" << den_ << "\n";
+    }
+private:
+    // Части -- приватные вложенные классы, снаружи недоступны
+    struct Numerator {
+        int value;
+        Numerator(int v) : value(v) {}
+    };
+    struct Denominator {
+        int value;
+        Denominator(int v) : value(v) {}
+    };
+    Numerator num_;
+    Denumerator den_;
+
+int main() {
+    Fraction f(3, 4);
+    f.print(); // 3/4
+}
+
+ПРИМЕР АГРЕГАЦИИ
+
+#include <iostream>
+#include <vector>
+
+class Element {
+public:
+    explicit Element(int value) : value_(value) {}
+    int value() const { return value_; }
+private:
+    int value_;
+};
+
+class Set {
+public:
+    void insert(Element* e) { elements_.push_back(e); } // агрегация: не владеем
+    void print() const {
+        std::cout << "{";
+        for (const Element* e : elements_)
+            std::cout << e->value() << " ";
+        std::cout << "}\n";
+    }
+private:
+    std::vector<Element*> elements_; // ссылки на внешние объекты
+};
+
+
+НАСЛЕДОВАНИЕ КОНСТРУКТОРОВ
+
+struct Derived : Base {
+    Derived(int x) : Base(x) {}
+    Derived(int x, int y) : Base(x, y) {}
+};
+
+
+ДРУЗЬЯ КЛАССА - механизм C++ позволяющий функции или другому классу получить
+доступ к членам класса, объявленным как private или protected, как если бы они были собственными.
+
+ПРИМЕР ДРУЖЕСТВЕННОЙ ФУНКЦИИ
+
+#include <iostream>
+#include <cmath>
+
+class Point {
+private:
+    double x, y;
+public:
+    Point(double x, double y) : x(x), y(y) {}
+    friend double distance(const Point& a, const Point& b);
+};
+
+double distance() { ... }
+
+int main() {
+    Point p1(0, 0), p2(3, 4);
+    std::cout << distance(p1, p2); // 5
+}
+
+ДРУЖЕСТВЕННЫЙ КЛАСС
+
+class Storage {
+private:
+    int secret = 42;
+    friend class Inspector;
+};
+
+class Inspector {
+public:
+    void show(const Storage& s) {
+        std::cout << s.secret; // доступ разрешен
+    }
+};
+
+
+ПЕРЕГРУЗКА << С ГЕТТЕРАМИ
+
+class Point {
+    double x_, y_;
+public:
+    Point(double x, double y) : x_(x), y_(y) {}
+    double x() const { return x_; }
+    double y() const { return y_; }
+};
+
+std::ostream& operator<<(std::cout& os, const Point& p) {
+    return os << "(" << p.x() << ", " << p.y() << ")";
+}
+
+int main() {
+    Point p(1.5, 2.5);
+    std::cout << p << '\n'; // (1.5, 2.5)
+
+
+ВИРТУАЛЬНЫЙ МЕТОД
+метод класса, который может быть переопределен в производных классах.
+Это называется динамическим связыванием.
+
+ПРИМЕР ВИРТУАЛЬНОГО МЕТОДА
+
+#include <iostream>
+
+class Function {
+public:
+    virtual double evaluate(double x) const = 0; // (1) // виртуальные функции
+    virtual ~Function() = default; // (2)
+};
+
+class Quadratic : public Function {
+public:
+    double evaluate(double x) const override { // (3) // переписываем метод в новом классе Quadratic
+        return x * x;
+    }
+};
+
+
+АЛГЕБРАИЧЕСКИЙ ТИП ДАННЫХ
+составной тип, значение которого строится одним из нескольких конструкторов,
+и каждый конструктор содержит набор значений других типов.
+
+
+ЭМУЛЯЦИЯ АЛГЕБРАИЧЕСКОГО ТИПА ДАННЫХ В С++
+
+constespr double kPi = = 2.0 * std::asin(1.0);
+
+class Shape {
+public:
+    virtual double perimeter() const = 0;
+    virtual ~Shape() = default;
+};
+
+class Rectangle : public Shape {
+    double width_;
+    double height_;
+public:
+    Rectangle(double width, double height)
+        : width_(width), height_(height) {}
+
+        double perimeter() const override {
+            return 2 * (width_ + height_);
+        }
+    }
+}
+
+int main() {
+    std::vector<std::unique_pt<Shape>> shapes;
+
+    shapes.pushback(std::make_unique<Rectangle>(3.0, 4.0));
+    std::cout << shape->perimeter() << '\n';
+
+    return 0;
+}
+
+
+ИНТЕРФЕЙС
+абстрактный тип, который задает набор операций, но не их реализацию
+
+ПРИМЕР ИНТЕРФЕЙСА
+
+struct IEncoder { // интерфейс
+    virtual std::string encode(const std::string& s) const = 0;
+    virtual ~IEncoder() = default;
+};
+
+struct Upper : IEncoder {
+    std::string encode(const std::string& s) const override {
+        std::string r = s;
+        for (char& c : r) c = std::toupper(c);
+        return r;
+    }
+};
+
+struct Reverse : IEncoder {
+    std::string encode(const std::string& s) const override {
+        return std::string(s.rbegin(), s.rend());
+    }
+};
+
+std::string encode {
+    ...
+    }
+
+
 
 */

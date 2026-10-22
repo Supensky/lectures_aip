@@ -1,105 +1,108 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct node {
+typedef struct Node {
     int data;
-    struct node *next;
+    struct Node *next;
 } node;
 
-node* createNode(int data) {
-    node* temp = (node*)malloc(sizeof(node));
-    temp->data = data;
-    temp->next = NULL;
-    return temp;
+node *init_node(int data) {
+    node *s = (node *)malloc(sizeof(node));
+    if (s == NULL) {
+        perror("Malloc failed");
+        exit(1);
+    }
+    s -> data = data;
+    s -> next = NULL;
+    return s;
 }
 
-void insert(node **head_ref, int data) {
-    node* new_node = createNode(data);
-    new_node->next = *head_ref;
-    *head_ref = new_node;
+void push(node **head, int val) {
+    node *newnode = init_node(val);
+    newnode -> next = *head;
+    *head = newnode;
 }
 
-int calc_in_postfix(node *head) {
-    int ans = 0;
-    for (node* curr = head; curr != NULL; curr = curr->next) {
-        for (node *temp = curr; temp != NULL; temp = temp->next) {
-            if (curr->data > temp->data) {
-                ans++;
-            }
+int calc_k(node *head) {
+    int k = 0;
+    for (node *first = head; first != NULL; first = first -> next) {
+        for (node *second = first; second != NULL; second = second -> next) {
+            if (first->data > second->data) k++;
         }
     }
-    return ans;
+    return k;
 }
 
-void display(node *head_ref) {
-    node *temp = head_ref;
+void print_k(node *head) {
+    node *temp = head;
     while (temp != NULL) {
-        printf("%d\n", temp->data);
-        temp = temp->next;
+        printf("%d ", temp -> data);
+        temp = temp -> next;
+    }
+    printf("\n");
+}
+
+node* newlist(node *head) {
+    if (head == NULL) return NULL;
+
+    node *nl = init_node(head->data);
+    head = head -> next;
+    while (head != NULL) {
+        push(&nl, head->data);
+        head = head -> next;
+    }
+    return nl;
+}
+
+
+void free_node(node *head) {
+    if (head != NULL) {
+        free_node(head -> next);
+        free(head);
     }
 }
 
-void display_last_k(node *head_ref, int k) {
-    node *temp = head_ref;
-    k--;
-    while (temp != NULL && k!=0) {
-        printf("%d\n", temp->data);
-        temp = temp->next;
-        k--;
-    }
-}
-
-node* deepCopy(node *head_ref) {
-    node *newlist = createNode(head_ref->data);
-    head_ref = head_ref->next;
-    while (head_ref != NULL) {
-        insert(&newlist, head_ref->data);
-        head_ref = head_ref->next;
-    }
-    return newlist;
-}
-
-void deepfree(node *head_ref) {
-    if (head_ref != NULL) {
-        deepfree(head_ref->next);
-        free(head_ref);
-    }
-}
-
-void insert_sort(node **head_ref) {
-    node *sorted = NULL;
-    node *curr = *head_ref;
-    while (curr != NULL) {
-        node *next = curr->next;
-        if (sorted == NULL || curr->data < sorted -> data) {
-            curr->next = sorted;
-            sorted = curr;
+void insert_sort(node **head) {
+    node *s = NULL;
+    node *temp = *head;
+    while (temp != NULL) {
+        node *next = temp -> next;
+        if (s == NULL || temp -> data < s -> data) {
+            temp -> next = s;
+            s = temp;
         } else {
-            node *t = sorted;
-            while (t->next != NULL && t->next->data < curr -> data) {
-                t = t->next;
+            node *cur = s;
+            while (cur -> next != NULL && cur -> next -> data < temp -> data) {
+                cur = cur -> next;
             }
-            curr->next = t->next;
-            t->next = curr;
+            temp -> next = cur -> next;
+            cur -> next = temp;
         }
-        curr = next;
+        temp = next;
     }
-    *head_ref = sorted;
+    *head = s;
 }
 
-int main(void) {
+int main() {
     node *head = NULL;
-    int x = 1;
-    while (scanf("%d", &x) != EOF) {
-        insert(&head, x);
+    int a = 1;
+
+    while (scanf("%d", &a) == 1) {
+        push(&head, a);
     }
-    display(head);
-    printf("INVERS %d\n", calc_in_postfix(head));
-    node *temp = deepCopy(head);
-    display(temp);
+
+    printf("Original list: ");
+    print_k(head);
+
+    printf("Invers: %d\n", calc_k(head));
+
+    node *temp = newlist(head);
     insert_sort(&temp);
-    display(temp);
-    deepfree(temp);
-    deepfree(head);
+
+    printf("Sorted list: ");
+    print_k(temp);
+
+    free_node(temp);
+    free_node(head);
     return 0;
 }

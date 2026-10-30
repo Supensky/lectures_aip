@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/AIP_CPP.iml" filepath="$PROJECT_DIR$/.idea/AIP_CPP.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/teor_infa.iml" filepath="$PROJECT_DIR$/.idea/teor_infa.iml" />
     </modules>
   </component>

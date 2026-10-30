@@ -1,4 +1,16 @@
 *.exe
-.vscode
-cmake-build-debug
-.idea
+*.out
+*.app
+cmake-build-debug/
+cmake-build-release/
+.cmake/
+build/
+.idea/
+.vscode/
+*.o
+*.obj
+# Игнорировать все файлы в корне, у которых нет расширения
+*
+!*/
+!*.*
+!LICENSE

@@ -1,6 +1,5 @@
 #include <cmath>
 #include <iostream>
-#include <math.h>
 
 struct Point3D {
     double x, y, z;

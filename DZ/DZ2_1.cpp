@@ -69,7 +69,7 @@ int main() {
 
     try {
         std::cout << x / z << "\n";
-    } catch (const std::domain_error& e) {
+    } catch (const std::invalid_argument& e) {
         std::cout << "Error: " << e.what() << "\n";
     }
 }

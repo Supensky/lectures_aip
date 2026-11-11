@@ -77,8 +77,6 @@ public:
         << "Birth date: " << (birthDate.day < 10 ? "0" : "") << birthDate.day << "."
         << (birthDate.month < 10 ? "0" : "") << birthDate.month << "." << birthDate.year << "\n";
     }
-
-
 };
 
 class Student : public Person{
@@ -108,23 +106,23 @@ public:
     }
 
     // Поиск по возрасту и полу
-    friend std::vector<Student> findStudents(std::vector<Student> students, int age, std::string gender) {
-        std::vector<Student> result;
+    friend std::vector<Student*> findStudents(std::vector<Student> students, int age, std::string gender) {
+        std::vector<Student*> result;
         Date today = Date::today();
-        for (const Student& s : students) {
-            if ((s.getGender() == gender) && (s.getBirthDate().age(today) == age)) {
-                result.emplace_back(s);
+        for (auto & student : students) {
+            if (student.getGender()==gender and student.getBirthDate().age(today) == age) {
+                result.push_back(&student);
             }
         }
         return result;
     }
 
-    friend void printList(const std::vector<Student>& students) {
+    friend void printList(const std::vector<Student*>& students) {
         if (students.empty()) {
             std::cout << "Empty list";
         }
-        for (const Student& s : students) {
-            s.printInfo();
+        for (const Student* s : students) {
+            s->printInfo();
             std::cout << "\n";
         }
     }

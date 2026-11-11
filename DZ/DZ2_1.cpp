@@ -9,7 +9,7 @@ public:
     // Конструкторы
     Interval(double a, double b) : a_(a), b_(b) {
         if (a > b) {
-            throw std::invalid_argument("Left interval is greater than or equal to right.");
+            std::swap(a_, b_);
         }
     }
     Interval(double x = 0.0) : a_(x), b_(x) {}
@@ -42,7 +42,7 @@ public:
     // Деление
     Interval operator/(const Interval& i) const {
         if (i.contains_zero()) {
-            throw std::domain_error("Division by zero.");
+            throw std::invalid_argument("Division by zero.");
         }
         return *this * Interval(1.0 / i.b_, 1.0 / i.a_);
     }

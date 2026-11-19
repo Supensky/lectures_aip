@@ -1,0 +1,6 @@
+name,age,grade,active
+Anna,19,4.5,true
+Boris,20,3.8,false
+Clara,18,5,true
+Dmitry,21,4.1,true
+Elena,19,,false

@@ -1,0 +1,32 @@
+[
+  {
+    "active": true,
+    "age": 19,
+    "grade": 4.5,
+    "name": "Anna"
+  },
+  {
+    "active": false,
+    "age": 20,
+    "grade": 3.8,
+    "name": "Boris"
+  },
+  {
+    "active": true,
+    "age": 18,
+    "grade": 5,
+    "name": "Clara"
+  },
+  {
+    "active": true,
+    "age": 21,
+    "grade": 4.1,
+    "name": "Dmitry"
+  },
+  {
+    "active": false,
+    "age": 19,
+    "grade": null,
+    "name": "Elena"
+  }
+]
